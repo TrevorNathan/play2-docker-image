@@ -8,7 +8,7 @@ This is docker image of Playframework
 
 2. Push to google cloud registry
 
-3. Create a deployment on your cluster
+3. Create a deployment on your kubernets cluster
 
 4. Create a service, with type=LoadBalancer to expose your app
 
