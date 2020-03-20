@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: play-app
+  name: play-app
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: play-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: play-app
+    spec:
+      containers:
+        - image: gcr.io/kubernets-271416/github_trevornathan_play2-docker-image
+          imagePullPolicy: IfNotPresent
+          name: play2-sha256-1
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: play-app
+  name: play-app-hpa-5fng
+  namespace: default
+spec:
+  maxReplicas: 5
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageUtilization: 80
+      type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: play-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: play-app
+  name: play-app-service
+  namespace: default
+spec:
+  clusterIP: 10.0.5.57
+  externalTrafficPolicy: Cluster
+  ports:
+    - nodePort: 30624
+      port: 80
+      protocol: TCP
+      targetPort: 9000
+  selector:
+    app: play-app
+  sessionAffinity: None
+  type: LoadBalancer
